@@ -1,6 +1,7 @@
 package bluetooth
 
 import (
+	"encoding/binary"
 	"errors"
 	"time"
 )
@@ -109,6 +110,8 @@ type AdvertisementPayload interface {
 	// ManufacturerData returns a map with all the manufacturer data present in the
 	//advertising. IT may be empty.
 	ManufacturerData() map[uint16][]byte
+
+    Class() uint32
 }
 
 // AdvertisementFields contains advertisement fields in structured form.
@@ -124,6 +127,8 @@ type AdvertisementFields struct {
 
 	// ManufacturerData is the manufacturer data of the advertisement.
 	ManufacturerData map[uint16][]byte
+
+    Class uint32
 }
 
 // advertisementFields wraps AdvertisementFields to implement the
@@ -159,6 +164,10 @@ func (p *advertisementFields) Bytes() []byte {
 // ManufacturerData returns the underlying ManufacturerData field.
 func (p *advertisementFields) ManufacturerData() map[uint16][]byte {
 	return p.AdvertisementFields.ManufacturerData
+}
+
+func (p *advertisementFields) Class() uint32 {
+	return p.AdvertisementFields.Class
 }
 
 // rawAdvertisementPayload encapsulates a raw advertisement packet. Methods to
@@ -266,6 +275,15 @@ func (buf *rawAdvertisementPayload) ManufacturerData() map[uint16][]byte {
 		data = data[fieldLength+1:]
 	}
 	return mData
+}
+
+// Class returns the class of the device
+func (buf *rawAdvertisementPayload) Class() uint32 {
+	b := buf.findField(0x0D) // Class of device
+	if len(b) != 0 {
+		return binary.BigEndian.Uint32(b)
+	}
+    return 0
 }
 
 // reset restores this buffer to the original state.

@@ -265,6 +265,7 @@ func makeScanResult(props *device.Device1Properties) ScanResult {
 				LocalName:        props.Name,
 				ServiceUUIDs:     serviceUUIDs,
 				ManufacturerData: mData,
+                Class: props.Class,
 			},
 		},
 	}
